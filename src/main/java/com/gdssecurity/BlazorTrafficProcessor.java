@@ -20,11 +20,12 @@ import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.extension.ExtensionUnloadingHandler;
 import burp.api.montoya.logging.Logging;
 import com.gdssecurity.handlers.BTPHttpRequestHandler;
-import com.gdssecurity.handlers.BTPHttpResponseHandler;
+import com.gdssecurity.handlers.BTPWebSocketCreationHandler;
 import com.gdssecurity.helpers.BTPConstants;
 import com.gdssecurity.providers.BTPContextMenuItemsProvider;
 import com.gdssecurity.providers.BTPHttpRequestEditorProvider;
 import com.gdssecurity.providers.BTPHttpResponseEditorProvider;
+import com.gdssecurity.providers.BTPWebSocketMessageEditorProvider;
 import com.gdssecurity.views.BTPView;
 
 /**
@@ -48,14 +49,20 @@ public class BlazorTrafficProcessor implements BurpExtension, ExtensionUnloading
         // Request/Response Editor Providers
         BTPHttpRequestEditorProvider requestEditorProvider = new BTPHttpRequestEditorProvider(this._montoya);
         BTPHttpResponseEditorProvider responseEditorProvider = new BTPHttpResponseEditorProvider(this._montoya);
+        BTPWebSocketMessageEditorProvider webSocketEditorProvider = new BTPWebSocketMessageEditorProvider(this._montoya);
         this._montoya.userInterface().registerHttpRequestEditorProvider(requestEditorProvider);
         this._montoya.userInterface().registerHttpResponseEditorProvider(responseEditorProvider);
+        this._montoya.userInterface().registerWebSocketMessageEditorProvider(webSocketEditorProvider);
 
-        // Request/Response Handlers (for Highlighting + Downgrade WS to HTTP)
-        BTPHttpResponseHandler downgradeHandler = new BTPHttpResponseHandler(this._montoya);
-        this._montoya.proxy().registerResponseHandler(downgradeHandler);
-        BTPHttpRequestHandler highlightHandler = new BTPHttpRequestHandler(this._montoya);
-        this._montoya.proxy().registerRequestHandler(highlightHandler);
+        // Downgrading websockets connection to HTTP is now not required
+        //BTPHttpResponseHandler downgradeHandler = new BTPHttpResponseHandler(this._montoya);
+        //this._montoya.proxy().registerResponseHandler(downgradeHandler);
+
+        // Request/Response Handlers (for Highlighting HTTP & Websockets)
+        BTPHttpRequestHandler httpHighlightHandler = new BTPHttpRequestHandler(this._montoya);
+        this._montoya.proxy().registerRequestHandler(httpHighlightHandler);
+        BTPWebSocketCreationHandler WebSocketHighlightHandler = new BTPWebSocketCreationHandler(this._montoya);
+        this._montoya.proxy().registerWebSocketCreationHandler(WebSocketHighlightHandler);
 
         // Setup the BTP tab in BurpSuite (main nav bar)
         BTPView burpTab = new BTPView(this._montoya);
@@ -67,6 +74,8 @@ public class BlazorTrafficProcessor implements BurpExtension, ExtensionUnloading
 
         this._montoya.extension().registerUnloadingHandler(this);
         this.logging.logToOutput(BTPConstants.LOADED_LOG_MSG);
+
+        this.logging.logToOutput("[*] This version have support for WebSocket messages that are sent in a single request. If a Blazor payload is separated into multiple WebSocket messages this extension won't work");
     }
 
     /**

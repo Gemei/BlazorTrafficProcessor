@@ -37,7 +37,7 @@ public class BTPHttpResponseEditorProvider implements HttpResponseEditorProvider
     }
 
     /**
-     * Returns a newly created HttpResponseEditor tab for each in-scope BlazorPack response.
+     * Returns a newly created ExtensionProvidedHttpResponseEditor tab for each in-scope BlazorPack response.
      * @param editorContext       Context details about the editor.
      * @return the newly created editor object
      */
