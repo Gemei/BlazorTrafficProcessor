@@ -20,3 +20,7 @@ gradle-app.setting
 
 # Intellij
 .idea
+
+# JAR builds
+BlazorTrafficProcessor-1.0.jar
+BlazorTrafficProcessor-1.1.jar
