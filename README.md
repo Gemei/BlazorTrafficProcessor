@@ -1,3 +1,6 @@
+# Notice
+This is a fork of a burp extension called Blazor Traffic Processor made by **Aon plc**. This fork was created to add support to WebSocket messages. Originally, this extension only supported BlazorPack requests through HTTP by forcing the application to use Long Pooling. Although this method might work for some applications, it causes issues for the majority of BlazorPack applications. Thus, I have made changes to the original source code to add support for WebSockets messages.
+
 # BlazorTrafficProcessor (BTP)
 A BurpSuite extension to aid pentesting web applications that use Blazor Server/BlazorPack. Primary functionality includes converting BlazorPack messages to JSON and vice versa, introduces tamperability for BlazorPack serialized messages.
 
@@ -28,7 +31,8 @@ A BurpSuite extension to aid pentesting web applications that use Blazor Server/
 **NOTE: it is recommended to check "Other Binary" in your Burp History filter, this will allow you to see data returned by the application.**
 
 ### Using the Extension
-* All BlazorPack-enabled requests or responses will be highlighted as Cyan within the "Http History" tab in Burpsuite.
+* If you are using Long pooling, then all BlazorPack-enabled requests or responses will be highlighted as Cyan within the "Http History" tab in Burpsuite.
+* If you are using WebSockets, then only important BlazorPack functions will be highlighted as Cyan within the "WebSockets history" tab in Burpsuite.
 * The "BTP" request/response editor tab, which appears on each in-scope request or response that contains BlazorPack messages. 
   * Clicking on this tab will convert the serialized data from BlazorPack to JSON.
   * After editing the JSON (either in Intercept or Repeater), click the "Raw" tab to re-serialize with your payloads
@@ -37,9 +41,20 @@ A BurpSuite extension to aid pentesting web applications that use Blazor Server/
   * The right-hand editor is for the results of the conversion
   * A drop-down menu on the bottom of the window lets you select "Blazor->JSON" or "JSON->Blazor"
   * The Serialize/Deserialize button at the top is how you trigger the conversion
-* Right-click menu option called "Send body to BTP tab"
+* Right-click menu option called "Send body to BTP tab" (Only works for HTTP history at the moment)
   * You can right-click any request or response and select "Extensions" -> "BlazorTrafficProcessor" -> "Send body to BTP tab"
   * This sends either the selected request or response body to the BTP tab, so you don't have to worry about copying/pasting raw bytes
+
+** Note: When using WebSockets the extension only highlights below functions
+* BeginInvokeDotNetFromJS
+* ReceiveJSDataChunk
+* ReceiveByteArray
+* StartCircuit
+* ConnectCircuit
+
+At the moment there is no user friendly way to change the default highlight filters, but I might add it in the future as part of the UI for this extension.
+
+You can learn about other BlazorPack functions here: https://github.com/dotnet/aspnetcore/blob/main/src/Components/Server/src/ComponentHub.cs
 
 ## Downgrade Explained (WS -> HTTP)
 Blazor server normally communicates via WebSockets, though it supports other protocols such as LongPolling over HTTP.
@@ -73,11 +88,15 @@ Server: Kestrel
 }
 ```
 
-This negotiation determines how the client and server will establish their connection. WebSockets is the preferred method but Burp previously didn't have the best support for WS extensions**, so we need to force the connection over HTTP in order to use the extension.
-Therefore, the browser (and JavaScript running in it) that you're proxying traffic through will see that websockets aren't supported and fall back to using HTTP ("LongPolling").
-BTP will automatically perform this downgrade, observable via the Original/Modified versions of the Blazor negotiation HTTP response.
+This negotiation determines how the client and server will establish their connection. WebSockets is the preferred method, however, you can force the connection over HTTP if you prefere using burp match and replace feature.
 
-** Note: Support for BlazorPack over WS is currently under development as there are newer iterations of Burp's Montoya APIs being released frequently with improved WS functionality.
+```
+Type: Response body
+Match: {"transport":"WebSockets","transferFormats":["Text","Binary"]},
+Replace:
+```
+
+** Note: Support for BlazorPack over WS is currently partially supported; if a Blazor message is sent through WebSockets over multiple messages of size 4096 each, then the conversion of serialized BlazorPack messages to JSON won't function. At the moment this is not a priority to implement, as important message types for Blazor are all sent in a single WebSockets message.
 
 ## Example Requests
 
@@ -167,4 +186,3 @@ Deserialized:
   }
 ]
 ```
-Copyright 2023 Aon plc
