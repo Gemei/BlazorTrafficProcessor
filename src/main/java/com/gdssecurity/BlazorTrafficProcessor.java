@@ -75,7 +75,7 @@ public class BlazorTrafficProcessor implements BurpExtension, ExtensionUnloading
         this._montoya.extension().registerUnloadingHandler(this);
         this.logging.logToOutput(BTPConstants.LOADED_LOG_MSG);
 
-        this.logging.logToOutput("[*] This version have support for WebSocket messages that are sent in a single request. If a Blazor payload is separated into multiple WebSocket messages this extension won't work");
+        this.logging.logToOutput("[*] This version has limited support for WebSocket message which are sent over more than one frame. If a Blazor payload is separated into multiple WebSocket frames this extension won't work");
     }
 
     /**

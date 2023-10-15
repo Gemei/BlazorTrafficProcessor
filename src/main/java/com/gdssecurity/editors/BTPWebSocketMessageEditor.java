@@ -74,7 +74,7 @@ public class BTPWebSocketMessageEditor implements ExtensionProvidedWebSocketMess
             this.logging.logToError("[-] getRequest - Unexpected exception while getting the request: " + e.getMessage());
             return null;
         }
-        /* TO-DO FIX ISSUE IN MODIFYING MESSAGES */
+
         this.websocketByteArray = ByteArray.byteArray(newBody);
         return this.websocketByteArray;
     }

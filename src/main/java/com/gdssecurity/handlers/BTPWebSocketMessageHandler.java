@@ -20,7 +20,8 @@ public class BTPWebSocketMessageHandler implements ProxyMessageHandler {
         ReceiveJSDataChunk,
         ReceiveByteArray,
         StartCircuit,
-        ConnectCircuit;
+        ConnectCircuit,
+        RenderBatch
     }
 
     /**
@@ -62,17 +63,13 @@ public class BTPWebSocketMessageHandler implements ProxyMessageHandler {
      */
     @Override
     public BinaryMessageReceivedAction handleBinaryMessageReceived(InterceptedBinaryMessage interceptedBinaryMessage) {
-        if (interceptedBinaryMessage.payload().length() >= 4 && interceptedBinaryMessage.direction().equals(CLIENT_TO_SERVER)) {
-            // If you want to highlight all blazor functions remove this if statement
-            //TODO allow the user to change or add their own filters in the UI
-            if(interceptedBinaryMessage.payload().indexOf(BlazorFunctions.BeginInvokeDotNetFromJS.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ReceiveJSDataChunk.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ReceiveByteArray.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.StartCircuit.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ConnectCircuit.name()) != -1
-            ){
-                interceptedBinaryMessage.annotations().setHighlightColor(HighlightColor.CYAN);
-            }
+        //TODO allow the user to change or add their own filters in the UI
+
+        // If you want to highlight all blazor functions remove below if statements, and uncomment below line
+        // interceptedBinaryMessage.annotations().setHighlightColor(HighlightColor.CYAN);
+        //if (interceptedBinaryMessage.payload().length() >= 4 && interceptedBinaryMessage.direction().equals(CLIENT_TO_SERVER))
+        if(interceptedBinaryMessage.payload().indexOf(BlazorFunctions.RenderBatch.name()) != -1) {
+            interceptedBinaryMessage.annotations().setHighlightColor(HighlightColor.CYAN);
         }
         return BinaryMessageReceivedAction.continueWith(interceptedBinaryMessage);
     }
@@ -85,16 +82,18 @@ public class BTPWebSocketMessageHandler implements ProxyMessageHandler {
      */
     @Override
     public BinaryMessageToBeSentAction handleBinaryMessageToBeSent(InterceptedBinaryMessage interceptedBinaryMessage) {
-        if (interceptedBinaryMessage.payload().length() >= 4 && interceptedBinaryMessage.direction().equals(CLIENT_TO_SERVER)) {
-            // If you want to highlight all blazor functions remove this if statement
-            if(interceptedBinaryMessage.payload().indexOf(BlazorFunctions.BeginInvokeDotNetFromJS.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ReceiveJSDataChunk.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ReceiveByteArray.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.StartCircuit.name()) != -1 ||
-                    interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ConnectCircuit.name()) != -1
-            ){
-                interceptedBinaryMessage.annotations().setHighlightColor(HighlightColor.CYAN);
-            }
+        //TODO allow the user to change or add their own filters in the UI
+
+        // If you want to highlight all blazor functions remove below if statements, and uncomment below line
+        // interceptedBinaryMessage.annotations().setHighlightColor(HighlightColor.CYAN);
+        //if (interceptedBinaryMessage.payload().length() >= 4 && interceptedBinaryMessage.direction().equals(CLIENT_TO_SERVER))
+        if(interceptedBinaryMessage.payload().indexOf(BlazorFunctions.BeginInvokeDotNetFromJS.name()) != -1 ||
+                interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ReceiveJSDataChunk.name()) != -1 ||
+                interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ReceiveByteArray.name()) != -1 ||
+                interceptedBinaryMessage.payload().indexOf(BlazorFunctions.StartCircuit.name()) != -1 ||
+                interceptedBinaryMessage.payload().indexOf(BlazorFunctions.ConnectCircuit.name()) != -1
+        ){
+            interceptedBinaryMessage.annotations().setHighlightColor(HighlightColor.CYAN);
         }
         return BinaryMessageToBeSentAction.continueWith(interceptedBinaryMessage);
     }
